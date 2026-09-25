@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Crypto Tax Calculator — Capital Gains, FIFO/LIFO, Multiple Countries</title>
+<meta name="description" content="Calculate cryptocurrency capital gains tax. FIFO/LIFO methods. Supports US, UK, EU, Cyprus and more. Free crypto tax estimator.">
+<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,sans-serif;background:#0a0608;color:#f0f0f0;min-height:100vh}.hero{text-align:center;padding:56px 20px 36px;background:linear-gradient(180deg,#1a0a14,#0a0608)}.hero h1{font-size:clamp(24px,4vw,40px);font-weight:700;background:linear-gradient(135deg,#f7931a,#e44d26);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:10px}.hero p{color:#555;font-size:15px}.wrap{max-width:800px;margin:32px auto;padding:0 20px 60px}.panel{background:#120a10;border:1px solid #2a1520;border-radius:14px;padding:24px;margin-bottom:14px}.panel h2{font-size:15px;font-weight:600;color:#f7931a;margin-bottom:16px}.lbl{font-size:12px;color:#6b7280;margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.04em}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:480px){.row{grid-template-columns:1fr}}input,select{width:100%;background:#0a0608;border:1px solid #2a1520;border-radius:8px;color:#f0f0f0;font-size:14px;padding:10px 12px;margin-bottom:12px;outline:none}input:focus,select:focus{border-color:#f7931a}.btn{background:linear-gradient(135deg,#f7931a,#e44d26);color:#fff;border:none;border-radius:10px;padding:12px 24px;font-size:15px;font-weight:600;cursor:pointer}.btn-add{background:#1a0a10;border:1px solid #2a1520;color:#f7931a;border-radius:8px;padding:9px 16px;font-size:13px;cursor:pointer}.tx-table{width:100%;border-collapse:collapse;font-size:12px}.tx-table th{background:#0a0608;padding:8px 10px;text-align:left;color:#6b7280;border-bottom:1px solid #2a1520}.tx-table td{padding:8px 10px;border-bottom:1px solid #160a12}.tx-table td input,tx-table td select{margin-bottom:0;padding:6px 8px;font-size:12px}.del{background:none;border:none;color:#ef4444;cursor:pointer;font-size:16px}.results{display:none}.metric{background:#0a0608;border:1px solid #2a1520;border-radius:10px;padding:14px;text-align:center;margin-bottom:8px}.mv{font-size:22px;font-weight:700}.ml{font-size:11px;color:#6b7280;margin-top:4px}.gain{color:#10b981}.loss{color:#ef4444}.warn{color:#f59e0b}.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}.tx-list{margin-top:10px}.tx-item{background:#0a0608;border:1px solid #2a1520;border-radius:8px;padding:10px 14px;margin-bottom:6px;font-size:12px;display:flex;justify-content:space-between}.ft{text-align:center;padding:24px;color:#333;font-size:12px}.ft a{color:#f7931a;text-decoration:none}</style>
+</head><body>
+<div class="hero"><h1>&#x20BF; Crypto Tax Calculator</h1><p>Capital gains &middot; FIFO/LIFO &middot; Multiple countries &middot; BTC, ETH, SOL and more</p></div>
+<div class="wrap">
+<div class="panel"><h2>Settings</h2>
+<div class="row">
+<div><label class="lbl">Country / Tax Regime</label><select id="country">
+<option value="0.2,0.2,0">Cyprus (0% or 20% CGT)</option>
+<option value="0.2,0.4,12000">UK (10%/20% after £12k exempt)</option>
+<option value="0.15,0.37,0">US Short/Long term</option>
+<option value="0.3,0.3,0">France (30% flat)</option>
+<option value="0.25,0.25,600">Germany (25% after €600)</option>
+<option value="0.19,0.19,0">Spain (19-26%)</option>
+<option value="0.28,0.28,0">Portugal (28%)</option>
+<option value="0,0,0">El Salvador (0% Bitcoin)</option>
+</select></div>
+<div><label class="lbl">Accounting Method</label><select id="method"><option value="fifo">FIFO (First In First Out)</option><option value="lifo">LIFO (Last In First Out)</option><option value="hifo">HIFO (Highest In First Out)</option></select></div>
+</div>
+<div class="row">
+<div><label class="lbl">Tax Year</label><select id="year"><option>2026</option><option>2025</option><option>2024</option></select></div>
+<div><label class="lbl">Currency</label><select id="cur"><option value="€">EUR</option><option value="$">USD</option><option value="£">GBP</option></select></div>
+</div>
+</div>
+<div class="panel"><h2>Transactions</h2>
+<div style="overflow-x:auto"><table class="tx-table">
+<thead><tr><th>Date</th><th>Type</th><th>Asset</th><th>Quantity</th><th>Price/unit</th><th>Fees</th><th></th></tr></thead>
+<tbody id="txbody"></tbody>
+</table></div>
+<button class="btn-add" onclick="addTx()" style="margin-top:10px">+ Add Transaction</button>
+<button class="btn" onclick="calculate()" style="float:right;margin-top:10px">Calculate Tax &rarr;</button>
+</div>
+<div class="results" id="results">
+<div class="g3">
+<div class="metric"><div class="mv gain" id="gains">-</div><div class="ml">Total Gains</div></div>
+<div class="metric"><div class="mv loss" id="losses">-</div><div class="ml">Total Losses</div></div>
+<div class="metric"><div class="mv" id="net">-</div><div class="ml">Net Gain/Loss</div></div>
+</div>
+<div class="g3">
+<div class="metric"><div class="mv warn" id="taxdue">-</div><div class="ml">Estimated Tax Due</div></div>
+<div class="metric"><div class="mv" id="effective">-</div><div class="ml">Effective Rate</div></div>
+<div class="metric"><div class="mv" id="txcount">-</div><div class="ml">Taxable Events</div></div>
+</div>
+<div class="panel"><h2>Transaction Details</h2><div class="tx-list" id="txlist"></div></div>
+</div>
+</div>
+<div class="ft">Powered by <a href="https://legion-api.com">LEGION Systems</a> &middot; <a href="https://gemmo.gumroad.com/l/ngtmw">AI API &euro;29/mo</a><br><small style="color:#1a1a1a;margin-top:4px;display:block">Estimates only. Consult a tax professional for official filings.</small></div>
+<script>
+const sym=()=>document.getElementById('cur').value;
+function addTx(date='',type='buy',asset='BTC',qty=1,price=30000,fee=0){
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td><input type="date" value="${date||new Date().toISOString().split('T')[0]}"></td>
+  <td><select><option value="buy" ${type==='buy'?'selected':''}>Buy</option><option value="sell" ${type==='sell'?'selected':''}>Sell</option><option value="receive">Receive</option><option value="swap">Swap</option></select></td>
+  <td><input type="text" value="${asset}" style="width:70px"></td>
+  <td><input type="number" value="${qty}" min="0" step="any" style="width:90px"></td>
+  <td><input type="number" value="${price}" min="0" step="any" style="width:100px"></td>
+  <td><input type="number" value="${fee}" min="0" step="any" style="width:70px"></td>
+  <td><button class="del" onclick="this.closest('tr').remove()">&#x2715;</button></td>`;
+  document.getElementById('txbody').appendChild(tr);
+}
+function calculate(){
+  const rows=[...document.querySelectorAll('#txbody tr')].map(tr=>{
+    const i=tr.querySelectorAll('input,select');
+    return{date:i[0].value,type:i[1].value,asset:i[2].value,qty:+i[3].value||0,price:+i[4].value||0,fee:+i[5].value||0};
+  }).sort((a,b)=>a.date.localeCompare(b.date));
+  const [shortRate,longRate,exempt]=document.getElementById('country').value.split(',').map(Number);
+  const pools={};let gains=0,losses=0,events=[];
+  rows.forEach(tx=>{
+    if(!pools[tx.asset])pools[tx.asset]=[];
+    if(tx.type==='buy'||tx.type==='receive'){
+      pools[tx.asset].push({qty:tx.qty,cost:(tx.price*tx.qty+tx.fee)});
+    } else if(tx.type==='sell'||tx.type==='swap'){
+      const proceeds=tx.qty*tx.price-tx.fee;
+      let remaining=tx.qty,costBasis=0;
+      const pool=[...pools[tx.asset]];
+      while(remaining>0&&pool.length){
+        const lot=pool[0];
+        const used=Math.min(remaining,lot.qty);
+        const lotCostPer=lot.cost/lot.qty;
+        costBasis+=used*lotCostPer;
+        lot.qty-=used;lot.cost-=used*lotCostPer;
+        if(lot.qty<=0.000001)pool.shift();
+        remaining-=used;
+      }
+      pools[tx.asset]=pool;
+      const pnl=proceeds-costBasis;
+      events.push({date:tx.date,asset:tx.asset,qty:tx.qty,proceeds,costBasis,pnl});
+      if(pnl>0)gains+=pnl;else losses+=Math.abs(pnl);
+    }
+  });
+  const net=gains-losses;
+  const taxable=Math.max(0,net-exempt);
+  const tax=taxable*shortRate;
+  const eff=net>0?tax/net*100:0;
+  document.getElementById('gains').textContent=sym()+gains.toFixed(2);
+  document.getElementById('losses').textContent='-'+sym()+losses.toFixed(2);
+  document.getElementById('net').textContent=(net>=0?'+':'')+sym()+net.toFixed(2);
+  document.getElementById('net').className='mv '+(net>=0?'gain':'loss');
+  document.getElementById('taxdue').textContent=sym()+tax.toFixed(2);
+  document.getElementById('effective').textContent=eff.toFixed(1)+'%';
+  document.getElementById('txcount').textContent=events.length;
+  const list=document.getElementById('txlist');
+  list.innerHTML=events.map(e=>`<div class="tx-item"><span>${e.date} &middot; ${e.asset} &middot; ${e.qty.toFixed(4)}</span><span>Proceeds: ${sym()}${e.proceeds.toFixed(2)} &middot; Cost: ${sym()}${e.costBasis.toFixed(2)} &middot; <strong class="${e.pnl>=0?'gain':'loss'}">${e.pnl>=0?'+':''}${sym()}${e.pnl.toFixed(2)}</strong></span></div>`).join('');
+  document.getElementById('results').style.display='block';
+}
+addTx('2024-01-15','buy','BTC',0.5,42000,50);
+addTx('2024-06-10','buy','ETH',2,3200,20);
+addTx('2025-03-20','sell','BTC',0.3,68000,30);
+addTx('2025-11-05','sell','ETH',1,4100,25);
+</script></body></html>
