@@ -1,0 +1,11 @@
+{
+  "tool": "crypto-tax",
+  "country": "GLOBAL",
+  "category": "crypto_tax",
+  "official_sources": [
+    "https://www.irs.gov/filing/digital-assets",
+    "https://www.oecd.org/tax/beps/crypto-asset-reporting-framework.htm"
+  ],
+  "last_reviewed": "2026-09-29",
+  "source_status": "official_sources_listed_not_formula_verified"
+}

@@ -1,0 +1,13 @@
+{
+  "slug": "crypto-tax",
+  "type": "calculator_or_tool",
+  "country": "GLOBAL",
+  "category": "crypto_tax",
+  "official_sources": [
+    "https://www.irs.gov/filing/digital-assets",
+    "https://www.oecd.org/tax/beps/crypto-asset-reporting-framework.htm"
+  ],
+  "claim_state": "method_unverified",
+  "phoenix_ready": false,
+  "limitations": "Crypto tax treatment varies by jurisdiction and transaction type. Verify locally."
+}
